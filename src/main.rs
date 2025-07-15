@@ -1,3 +1,16 @@
+// Flavors:
+//  - Synchronous channels: Channel where send() can block. Limited capacity.
+//   - Mutex + Condvar + VecDeque
+//  - Asynchronous channels: Channel where send() cannot block. Unbounded.
+//   - Mutex + Condvar + VecDeque
+//   - Mutex + Condvar + LinkedList
+//   - Atomic linked list, linked list of T
+//   - Atomic block linked list, linked list of atomic VecDeque<T>
+//  - Rendezvous channels: Synchronous with capacity = 0. Used for thread synchronization.
+//  - Oneshot channels: Any capacity. In practice, only one call to send().
+
+// Below implementation is a async channel
+
 use std::{
     collections::VecDeque,
     sync::{Arc, Condvar, Mutex},
@@ -133,17 +146,17 @@ fn channel<T>() -> (Sender<T>, Reciever<T>) {
 
 fn main() {
     // Test case : 1 (Multiple senders)
-    // let (mut tx, mut rx) = channel();
-    // tx.send(5).ok();
+    let (mut tx, mut rx) = channel();
+    tx.send(5).ok();
 
-    // let mut tx2 = tx.clone();
-    // tx2.send(10).ok();
+    let mut tx2 = tx.clone();
+    tx2.send(10).ok();
 
-    // let val = rx.recv();
-    // println!("{val:?}");
+    let val = rx.recv();
+    println!("{val:?}");
 
-    // let val = rx.recv();
-    // println!("{val:?}");
+    let val = rx.recv();
+    println!("{val:?}");
 
     //////////////////////////////////////////////////////
 
@@ -179,5 +192,4 @@ fn main() {
     // println!("{:?}", rx.next()); // This one attains lock and fills the element 10 and 15 to buffer and returns 5
     // println!("{:?}", rx.next()); // This one just returns 10 from buffer without attaining lock
     // println!("{:?}", rx.next()); // This one just returns 15 from buffer without attaining lock
-
 }
